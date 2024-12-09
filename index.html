@@ -80,11 +80,11 @@
 <body>
     <h1>Sudoku Generator</h1>
     <div class="slider-container">
-        <label for="difficulty">Sværhedsgrad: <span id="difficulty-value">40</span> fjernede celler</label>
+        <label for="difficulty">Difficulty: <span id="difficulty-value">40</span> fjernede celler</label>
         <input type="range" id="difficulty" min="20" max="60" value="40">
     </div>
     <table id="sudoku-board"></table>
-    <button onclick="generateSudoku()">Generer Sudoku</button>
+    <button onclick="generateSudoku()">Generate Sudoku</button>
     <script>
         // Funktion til at fylde Sudoku-brættet korrekt
         function fillBoard(board) {
