@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 18px;
+            border: 1px solid black;
+        }
+        /* Tykkere ydre kanter */
+        table td:first-child {
+            border-left: 3px solid black;
+        }
+        table td:last-child {
+            border-right: 3px solid black;
+        }
+        table tr:first-child td {
+            border-top: 3px solid black;
+        }
+        table tr:last-child td {
+            border-bottom: 3px solid black;
+        }
+        /* Tykkere kanter for hver 3x3 blok */
+        table td:nth-child(3n+1) {
+            border-left: 3px solid black;
+        }
+        table td:nth-child(3n) {
+            border-right: 3px solid black;
+        }
+        table tr:nth-child(3n+1) td {
+            border-top: 3px solid black;
+        }
+        table tr:nth-child(3n) td {
+            border-bottom: 3px solid black;
+        }
+        td.filled {
+            background-color: #f0f0f0;
+        }
+        .slider-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .slider-container label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .slider-container input[type="range"] {
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku Generator</h1>
+    <div class="slider-container">
+        <label for="difficulty">Sværhedsgrad: <span id="difficulty-value">40</span> fjernede celler</label>
+        <input type="range" id="difficulty" min="20" max="60" value="40">
+    </div>
+    <table id="sudoku-board"></table>
+    <button onclick="generateSudoku()">Generer Sudoku</button>
+    <script>
+        // Funktion til at fylde Sudoku-brættet korrekt
+        function fillBoard(board) {
+            function isSafe(board, row, col, num) {
+                for (let x = 0; x < 9; x++) {
+                    if (board[row][x] === num || board[x][col] === num) return false;
+                }
+                const startRow = Math.floor(row / 3) * 3;
+                const startCol = Math.floor(col / 3) * 3;
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        if (board[startRow + i][startCol + j] === num) return false;
+                    }
+                }
+                return true;
+            }
+
+            function solve(board) {
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 9; col++) {
+                        if (board[row][col] === 0) {
+                            for (let num = 1; num <= 9; num++) {
+                                if (isSafe(board, row, col, num)) {
+                                    board[row][col] = num;
+                                    if (solve(board)) return true;
+                                    board[row][col] = 0;
+                                }
+                            }
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            solve(board);
+        }
+
+        // Funktion til at fjerne tilfældige celler
+        function removeCells(board, difficulty) {
+            let count = difficulty;
+            while (count > 0) {
+                const row = Math.floor(Math.random() * 9);
+                const col = Math.floor(Math.random() * 9);
+                if (board[row][col] !== 0) {
+                    board[row][col] = 0;
+                    count--;
+                }
+            }
+        }
+
+        // Funktion til at generere et nyt Sudoku
+        function generateSudoku() {
+            const board = document.getElementById("sudoku-board");
+            board.innerHTML = ""; // Ryd det gamle board
+
+            // Start med et tomt bræt
+            const sudoku = Array.from({ length: 9 }, () => Array(9).fill(0));
+
+            // Fyld Sudoku-brættet
+            fillBoard(sudoku);
+
+            // Få sværhedsgraden fra slideren
+            const difficulty = document.getElementById("difficulty").value;
+
+            // Fjern celler for at lave et puslespil
+            removeCells(sudoku, difficulty);
+
+            // Byg tabellen
+            for (let i = 0; i < 9; i++) {
+                const row = document.createElement("tr");
+                for (let j = 0; j < 9; j++) {
+                    const cell = document.createElement("td");
+                    if (sudoku[i][j] !== 0) {
+                        cell.textContent = sudoku[i][j];
+                        cell.classList.add("filled");
+                    }
+                    row.appendChild(cell);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        // Opdater sværhedsgradsteksten, når slideren ændres
+        document.getElementById("difficulty").addEventListener("input", function () {
+            document.getElementById("difficulty-value").textContent = this.value;
+        });
+
+        // Generer et Sudoku, når siden indlæses
+        generateSudoku();
+    </script>
+</body>
+</html>
